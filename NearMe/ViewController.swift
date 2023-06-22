@@ -47,6 +47,7 @@ private extension ViewController {
     }
     
     func setupUI() {
+        searchTextField.delegate = self
         setupLocationAccess()
     }
     
@@ -79,6 +80,45 @@ private extension ViewController {
         self.locationManager?.requestAlwaysAuthorization()
         self.locationManager?.requestLocation()
     }
+    
+    func checkLoactionAuthorization() {
+        guard let locationManager = locationManager,
+              let location = locationManager.location else { return }
+        
+        switch locationManager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            let region = MKCoordinateRegion.init(center: location.coordinate, latitudinalMeters: 750, longitudinalMeters: 750)
+            mapView.setRegion(region, animated: true)
+        case .denied:
+            print("Location Services is not allowed")
+        case .notDetermined, .restricted:
+            print("Loaction not determined")
+        @unknown default:
+            print("Error Unknown")
+        }
+    }
+    
+    func findNearbyPlaces(by query: String) {
+        
+        //clear all older annotations
+        mapView.removeAnnotations(mapView.annotations)
+        
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        request.region = mapView.region
+        
+        let search = MKLocalSearch(request: request)
+        search.start { [weak self] response, error in
+            guard let response = response, error == nil else {
+                return
+            }
+            
+            let places = response.mapItems.map(PlaceAnnotations.init)
+            places.forEach { place in
+                self?.mapView.addAnnotation(place)
+            }
+        }
+    }
 }
 
 extension ViewController: CLLocationManagerDelegate {
@@ -86,8 +126,25 @@ extension ViewController: CLLocationManagerDelegate {
         
     }
     
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLoactionAuthorization()
+    }
+    
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error)
+    }
+}
+
+extension ViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let text = textField.text ?? ""
+        
+        if !text.isEmpty {
+            textField.resignFirstResponder()
+            findNearbyPlaces(by: text)
+        }
+        
+        return true
     }
 }
 
