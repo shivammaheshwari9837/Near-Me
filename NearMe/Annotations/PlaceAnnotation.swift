@@ -1,5 +1,5 @@
 //
-//  PlaceAnnotations.swift
+//  PlaceAnnotation.swift
 //  NearMe
 //
 //  Created by Shivam Maheshwari on 22/06/23.
@@ -8,7 +8,7 @@
 import Foundation
 import MapKit
 
-class PlaceAnnotations: MKPointAnnotation {
+class PlaceAnnotation: MKPointAnnotation {
     let mapItem: MKMapItem
     let id = UUID()
     var isSelected: Bool = false

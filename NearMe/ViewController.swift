@@ -11,7 +11,8 @@ import MapKit
 class ViewController: UIViewController {
     
     private var locationManager: CLLocationManager?
-    
+    private var places: [PlaceAnnotation] = []
+        
     private let mapView: MKMapView = {
         let map = MKMapView()
         map.showsUserLocation = true
@@ -48,6 +49,7 @@ private extension ViewController {
     
     func setupUI() {
         searchTextField.delegate = self
+        mapView.delegate = self
         setupLocationAccess()
     }
     
@@ -113,10 +115,28 @@ private extension ViewController {
                 return
             }
             
-            let places = response.mapItems.map(PlaceAnnotations.init)
-            places.forEach { place in
+            self?.places = response.mapItems.map(PlaceAnnotation.init)
+            self?.places.forEach { place in
                 self?.mapView.addAnnotation(place)
             }
+            
+            if let places = self?.places {
+                self?.presentPlacesList(places: places)
+            }
+        }
+    }
+    
+    func presentPlacesList(places: [PlaceAnnotation]) {
+        guard let locationManager = locationManager,
+              let userLocation = locationManager.location else { return }
+        
+        let placesTableVC = PlacesTableViewController(userLocation: userLocation, places: places)
+        placesTableVC.modalPresentationStyle = .pageSheet
+        
+        if let sheet = placesTableVC.sheetPresentationController {
+            sheet.prefersGrabberVisible = true
+            sheet.detents = [.medium(), .large()]
+            present(placesTableVC, animated: true)
         }
     }
 }
@@ -145,6 +165,25 @@ extension ViewController: UITextFieldDelegate {
         }
         
         return true
+    }
+}
+
+extension ViewController: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
+        
+        clearAllSelections()
+        
+        guard let selectionAnnotation = annotation as? PlaceAnnotation else { return }
+        let placeAnnotation = self.places.first(where: { $0.id == selectionAnnotation.id })
+        placeAnnotation?.isSelected = true
+        
+        presentPlacesList(places: self.places)
+    }
+    
+    func clearAllSelections() {
+        self.places.forEach { place in
+            place.isSelected = false
+        }
     }
 }
 
