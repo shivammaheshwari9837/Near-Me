@@ -9,7 +9,9 @@ Near Me is an iOS app that allows users to discover nearby places based on their
 - **Detail Screen:** Upon tapping on a selected place, the app displays a detailed screen with comprehensive information about that place.
 - **Directions via Apple Maps:** Near Me integrates with Apple Maps, enabling users to get exact directions to their favorite place with just one click. This feature enhances the user's convenience and navigation experience.
 - **Call Feature:** Users can directly call any favorite place from within the app. This feature eliminates the need to manually search for a place's contact information and streamlines the process of making reservations or inquiries.
+
 ## Video
+https://github.com/shivammaheshwari9837/Near-Me/assets/56878460/a1758af9-f80d-4866-ba30-2d62893da5a9
 
 ## Requirments
 - iOS 14.0+
